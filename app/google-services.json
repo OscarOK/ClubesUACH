@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "778993753276",
+    "firebase_url": "https://clubesuach.firebaseio.com",
+    "project_id": "clubesuach",
+    "storage_bucket": "clubesuach.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:778993753276:android:e6a113ff0436cf09",
+        "android_client_info": {
+          "package_name": "mx.uach.clubes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "778993753276-tnq8cj007jgfpun6b3dg7ouoet03uc5c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXghWLmooChwbGhOa7YzvdSvvmkqYF4AE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "778993753276-tnq8cj007jgfpun6b3dg7ouoet03uc5c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
