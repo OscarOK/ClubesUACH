@@ -1,12 +1,17 @@
 package mx.uach.clubes;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
@@ -16,14 +21,18 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
 
-public class MainActivity extends AppCompatActivity {
+import mx.uach.clubes.fragments.DashboardFragment;
+import mx.uach.clubes.fragments.MyClubsFragment;
+import mx.uach.clubes.fragments.ProfileFragment;
+
+public class MainActivity extends AppCompatActivity implements MyClubsFragment.OnFragmentInteractionListener, ProfileFragment.OnFragmentInteractionListener, DashboardFragment.OnFragmentInteractionListener {
 
     private static final int RC_SIGN_IN = 1;
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
 
-    private TextView mTextMessage;
+    private FrameLayout contentFrame;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -32,13 +41,13 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_home);
+                    loadFragment(new ProfileFragment());
                     return true;
                 case R.id.navigation_dashboard:
-                    mTextMessage.setText(R.string.title_dashboard);
+                    loadFragment(new DashboardFragment());
                     return true;
                 case R.id.navigation_notifications:
-                    mTextMessage.setText(R.string.title_notifications);
+                    loadFragment(new MyClubsFragment());
                     return true;
             }
             return false;
@@ -50,8 +59,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTextMessage = (TextView) findViewById(R.id.message);
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        contentFrame = findViewById(R.id.content_frame);
+        loadFragment(new DashboardFragment());
+
+        BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -78,6 +89,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+    }
+
+    private boolean loadFragment(Fragment fragment) {
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.content_frame, fragment)
+                    .commit();
+
+            return true;
+        }
+
+        return false;
     }
 
     private void onSignedOutCleanup() {
@@ -111,5 +135,10 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }
