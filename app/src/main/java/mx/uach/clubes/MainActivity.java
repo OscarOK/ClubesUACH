@@ -32,22 +32,20 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
 
-    private FrameLayout contentFrame;
-
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.navigation_home:
-                    loadFragment(new ProfileFragment());
-                    return true;
                 case R.id.navigation_dashboard:
                     loadFragment(new DashboardFragment());
                     return true;
-                case R.id.navigation_notifications:
+                case R.id.navigation_my_clubs:
                     loadFragment(new MyClubsFragment());
+                    return true;
+                case R.id.navigation_profile:
+                    loadFragment(new ProfileFragment());
                     return true;
             }
             return false;
@@ -59,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        contentFrame = findViewById(R.id.content_frame);
         loadFragment(new DashboardFragment());
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
