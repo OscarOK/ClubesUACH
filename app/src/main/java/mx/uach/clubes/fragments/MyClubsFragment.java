@@ -3,12 +3,22 @@ package mx.uach.clubes.fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import mx.uach.clubes.R;
+import mx.uach.clubes.adapters.ClubAdapter;
+import mx.uach.clubes.clubs.Club;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,10 +72,32 @@ public class MyClubsFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_my_clubs, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        FloatingActionButton fabAddClub = view.findViewById(R.id.fab_add_club);
+        RecyclerView rvClubs = view.findViewById(R.id.rv_clubs);
+
+        final Context context = view.getContext();
+
+        fabAddClub.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "DEMO", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Initialize message ListView and its adapter
+        List<Club> friendlyMessages = new ArrayList<>();
+        //ClubAdapter mClubAdapter = new ClubAdapter(view.getContext(), R.layout.club_item, friendlyMessages);
+        //rvClubs.setAdapter(mClubAdapter);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

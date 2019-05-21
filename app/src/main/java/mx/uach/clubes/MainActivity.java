@@ -7,30 +7,38 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
 
+import mx.uach.clubes.Utils.UserDBUtils;
 import mx.uach.clubes.fragments.DashboardFragment;
 import mx.uach.clubes.fragments.MyClubsFragment;
 import mx.uach.clubes.fragments.ProfileFragment;
+import mx.uach.clubes.users.Student;
 
 public class MainActivity extends AppCompatActivity implements MyClubsFragment.OnFragmentInteractionListener, ProfileFragment.OnFragmentInteractionListener, DashboardFragment.OnFragmentInteractionListener {
 
     private static final int RC_SIGN_IN = 1;
 
+    private Student student = null;
+
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
+
+    // Firebase instance variables
+    private FirebaseDatabase mFirebaseDatabase;
+    private DatabaseReference mUserDatabaseReference;
+    private ChildEventListener mChildEventListener;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -45,7 +53,11 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
                     loadFragment(new MyClubsFragment());
                     return true;
                 case R.id.navigation_profile:
-                    loadFragment(new ProfileFragment());
+                    try {
+                        loadFragment(ProfileFragment.newInstance(student));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     return true;
             }
             return false;
@@ -63,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+
 
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -71,6 +85,13 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
 
                 if (user != null) {
                     onSignedInInit();
+                    Log.e("UID", user.getUid());
+                    UserDBUtils.checkNewUser(user, new UserDBUtils.OnOscarListener() {
+                        @Override
+                        public void oscarin(Student student) {
+                            MainActivity.this.student = student;
+                        }
+                    });
                 } else {
                     onSignedOutCleanup();
                     startActivityForResult(
@@ -137,5 +158,11 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+
+    @Override
+    public void onFragmentInteraction(Student user) {
+        student = user;
     }
 }

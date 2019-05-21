@@ -3,12 +3,20 @@ package mx.uach.clubes.fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import mx.uach.clubes.R;
+import mx.uach.clubes.Utils.UserDBUtils;
+import mx.uach.clubes.users.Student;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,35 +27,34 @@ import mx.uach.clubes.R;
  * create an instance of this fragment.
  */
 public class ProfileFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final String ARG_PARAM1 = "fist_name";
+    private static final String ARG_PARAM2 = "last_name";
+    private static final String ARG_PARAM3 = "enrollment";
+    private static final String ARG_PARAM4 = "email";
+    private static final String ARG_PARAM5 = "uid";
 
     private OnFragmentInteractionListener mListener;
 
-    public ProfileFragment() {
-        // Required empty public constructor
-    }
+    private Student student;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
+    private boolean editState = false;
+
+    private EditText etFirstName;
+    private EditText etLastName;
+    private EditText etEnrollment;
+    private TextView tvEmail;
+    private FloatingActionButton fabEditProfile;
+
+    public ProfileFragment() {}
+
+    public static ProfileFragment newInstance(Student student) throws NullPointerException {
         ProfileFragment fragment = new ProfileFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM1, student.getFirstName());
+        args.putString(ARG_PARAM2, student.getLastName());
+        args.putString(ARG_PARAM3, student.getEnrollment());
+        args.putString(ARG_PARAM4, student.getEmail());
+        args.putString(ARG_PARAM5, student.getUID());
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,22 +63,116 @@ public class ProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            String firstName = getArguments().getString(ARG_PARAM1);
+            String lastName = getArguments().getString(ARG_PARAM2);
+            String enrollment = getArguments().getString(ARG_PARAM3);
+            String email = getArguments().getString(ARG_PARAM4);
+            String uid = getArguments().getString(ARG_PARAM5);
+
+            student = new Student(uid, firstName, lastName, email, enrollment);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        final Context context = view.getContext();
+
+        etFirstName = view.findViewById(R.id.et_first_name);
+        etLastName = view.findViewById(R.id.et_last_name);
+        etEnrollment = view.findViewById(R.id.et_enrollment);
+        tvEmail = view.findViewById(R.id.tv_email);
+        fabEditProfile = view.findViewById(R.id.fab_edit_profile);
+
+        etFirstName.setText(student.getFirstName());
+        etLastName.setText(student.getLastName());
+        etEnrollment.setText(student.getEnrollment());
+        tvEmail.setText(student.getEmail());
+
+        turnOffEditTexts();
+
+        fabEditProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editState = !editState;
+                fabAction(context);
+            }
+        });
+    }
+
+    private void fabAction(Context context) {
+        if (editState) {
+            turnOnEditTexts();
+            fabEditProfile.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_done_white_24dp));
+        } else {
+            turnOffEditTexts();
+            fabEditProfile.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_edit_white_24dp));
+
+            if (isValidInput()) {
+                updateStudent();
+            }
+        }
+    }
+
+    private boolean isValidInput() {
+        if (etFirstName.getText().toString().trim().equals("")) {
+            etFirstName.setError(getResources().getString(R.string.err_first_name));
+            return false;
+        }
+
+        return true;
+    }
+
+    private void updateStudent() {
+        student.setFirstName(etFirstName.getText().toString());
+        student.setLastName(etLastName.getText().toString());
+        student.setEnrollment(etEnrollment.getText().toString());
+        UserDBUtils.pushUser(student);
+    }
+
+    private void turnOffEditTexts() {
+        turnOffEditText(etFirstName);
+        turnOffEditText(etLastName);
+        turnOffEditText(etEnrollment);
+    }
+
+    private void turnOnEditTexts() {
+        turnOnEditText(etFirstName);
+        turnOnEditText(etLastName);
+        turnOnEditText(etEnrollment);
+    }
+
+    private void turnOffEditText(EditText et) {
+        et.setFocusableInTouchMode(false);
+        et.setFocusable(false);
+        et.setClickable(false);
+    }
+
+    private void turnOnEditText(EditText et) {
+        et.setFocusableInTouchMode(true);
+        et.setFocusable(true);
+        et.setClickable(true);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onFragmentInteraction(student);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mListener != null) {
+            mListener.onFragmentInteraction(student);
         }
     }
 
@@ -104,6 +205,6 @@ public class ProfileFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteraction(Student user);
     }
 }
