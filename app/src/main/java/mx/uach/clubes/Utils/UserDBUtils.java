@@ -18,7 +18,7 @@ public abstract class UserDBUtils {
 
     private static FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public static void checkNewUser(final FirebaseUser user, final OnSuccessUserListener listener) {
+    public static void signInUser(final FirebaseUser user, final OnSuccessUserListener listener) {
         CollectionReference studentsReference = db.collection(COLLECTION_STUDENTS);
 
         DocumentReference doc = studentsReference.document(user.getUid());
@@ -27,13 +27,22 @@ public abstract class UserDBUtils {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    DocumentSnapshot documentReference = task.getResult();
+                    final DocumentSnapshot documentReference = task.getResult();
 
                     assert documentReference != null;
 
                     if (!documentReference.exists()) {
-                        pushUser(new Student(user));
-                    } else if(listener != null){
+                        final Student student = new Student(user);
+                        CollectionReference studentsReference = db.collection(COLLECTION_STUDENTS);
+                        studentsReference.document(student.getUID()).set(student).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(listener != null){
+                                    listener.onSuccessUserListener(student);
+                                }
+                            }
+                        });
+                    } else if (listener != null) {
                         Student student = documentReference.toObject(Student.class);
                         listener.onSuccessUserListener(student);
                     }

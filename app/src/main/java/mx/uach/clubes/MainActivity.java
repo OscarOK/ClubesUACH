@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.firebase.ui.auth.AuthUI;
@@ -48,11 +49,11 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
                     loadFragment(new MyClubsFragment());
                     return true;
                 case R.id.navigation_profile:
-                    try {
-                        loadFragment(ProfileFragment.newInstance(student));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                        try {
+                            loadFragment(ProfileFragment.newInstance(student));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     return true;
             }
             return false;
@@ -69,18 +70,16 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
 
         mFirebaseAuth = FirebaseAuth.getInstance();
 
-
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
 
                 if (user != null) {
-                    UserDBUtils.checkNewUser(user, new UserDBUtils.OnSuccessUserListener() {
+                    UserDBUtils.signInUser(user, new UserDBUtils.OnSuccessUserListener() {
                         @Override
                         public void onSuccessUserListener(Student student) {
                             MainActivity.this.student = student;
-
                             try {
                                 loadFragment(DashboardFragment.newInstance(student.getUID()));
                             } catch (Exception e) {
@@ -139,7 +138,24 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_CANCELED) {
                 finish();
+            } else {
+                FirebaseUser user = mFirebaseAuth.getCurrentUser();
+                if (user != null) {
+                    UserDBUtils.signInUser(user, new UserDBUtils.OnSuccessUserListener() {
+                        @Override
+                        public void onSuccessUserListener(Student student) {
+                            MainActivity.this.student = student;
+
+                            try {
+                                loadFragment(DashboardFragment.newInstance(MainActivity.this.student.getUID()));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                }
             }
+
         }
     }
 
