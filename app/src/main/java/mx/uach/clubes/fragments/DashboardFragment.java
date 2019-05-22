@@ -1,5 +1,7 @@
 package mx.uach.clubes.fragments;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import mx.uach.clubes.PostActivity;
 import mx.uach.clubes.Posts.AuthorPost;
 import mx.uach.clubes.R;
 import mx.uach.clubes.Utils.PostsDBUtils;
@@ -79,6 +82,11 @@ public class DashboardFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.rv_dashboard);
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         CollectionReference collections = db.collection("posts");
 
@@ -91,6 +99,7 @@ public class DashboardFragment extends Fragment {
                 }
             }
         });
+
 
         update();
     }
@@ -106,9 +115,27 @@ public class DashboardFragment extends Fragment {
 
                         PostsDBUtils.getClubsPosts(clubs, new PostsDBUtils.OnSuccessLoadPosts() {
                             @Override
-                            public void onSuccessLoadPosts(ArrayList<AuthorPost> posts) {
+                            public void onSuccessLoadPosts(final ArrayList<AuthorPost> posts) {
                                 adapter = new PostsAdapter(posts);
                                 recyclerView.setAdapter(adapter);
+
+                                adapter.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        int index = recyclerView.getChildAdapterPosition(v);
+                                        AuthorPost post = posts.get(index);
+
+                                        Bundle args = new Bundle();
+                                        args.putString("post_club_name", post.getClubName());
+                                        args.putString("post_title", post.getTitle());
+                                        args.putString("post_content", post.getContent());
+                                        args.putString("post_date", post.getDateStr());
+
+                                        Intent i = new Intent(getActivity(), PostActivity.class);
+                                        i.putExtras(args);
+                                        startActivity(i);
+                                    }
+                                });
                             }
                         });
                     }
