@@ -1,5 +1,7 @@
 package mx.uach.clubes.users;
 
+import android.util.Log;
+
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ public class Student {
         this.email = user.getEmail();
         this.getName(user.getDisplayName());
         this.clubs = new ArrayList<>();
+        this.enrollment = "";
     }
 
     public Student(String UID, String firstName, String lastName, String email, String enrollment) {
@@ -98,5 +101,26 @@ public class Student {
 
     public void addClub(Club club) {
         clubs.add(club.getId());
+    }
+
+    public boolean updateData(Student student) {
+        boolean changes = false;
+
+        if (!this.firstName.equals(student.firstName)) {
+            this.firstName = student.firstName;
+            changes = true;
+        }
+
+        if (!this.lastName.equals(student.lastName)) {
+            this.lastName = student.lastName;
+            changes = true;
+        }
+
+        if (!this.enrollment.equals(student.enrollment)) {
+            this.enrollment = student.enrollment;
+            changes = true;
+        }
+
+        return changes;
     }
 }

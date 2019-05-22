@@ -112,11 +112,11 @@ public class ProfileFragment extends Fragment {
             turnOnEditTexts();
             fabEditProfile.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_done_white_24dp));
         } else {
-            turnOffEditTexts();
-            fabEditProfile.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_edit_white_24dp));
-
             if (isValidInput()) {
+                turnOffEditTexts();
+                fabEditProfile.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_edit_white_24dp));
                 updateStudent();
+
             }
         }
     }
@@ -134,7 +134,6 @@ public class ProfileFragment extends Fragment {
         student.setFirstName(etFirstName.getText().toString());
         student.setLastName(etLastName.getText().toString());
         student.setEnrollment(etEnrollment.getText().toString());
-        UserDBUtils.pushUser(student);
     }
 
     private void turnOffEditTexts() {

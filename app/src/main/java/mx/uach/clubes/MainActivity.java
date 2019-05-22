@@ -145,12 +145,12 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
 
     @Override
     public void onFragmentInteraction(Uri uri) {
-
     }
-
 
     @Override
     public void onFragmentInteraction(Student user) {
-        student = user;
+        if (student != null && user != null && student.updateData(user)) {
+            UserDBUtils.pushUser(student);
+        }
     }
 }
