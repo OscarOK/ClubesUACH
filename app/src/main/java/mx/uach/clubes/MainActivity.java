@@ -8,15 +8,11 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
 
@@ -26,7 +22,7 @@ import mx.uach.clubes.fragments.MyClubsFragment;
 import mx.uach.clubes.fragments.ProfileFragment;
 import mx.uach.clubes.users.Student;
 
-public class MainActivity extends AppCompatActivity implements MyClubsFragment.OnFragmentInteractionListener, ProfileFragment.OnFragmentInteractionListener, DashboardFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements MyClubsFragment.OnFragmentInteractionListener, ProfileFragment.OnFragmentInteractionListener {
 
     private static final int RC_SIGN_IN = 1;
 
@@ -35,11 +31,6 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
 
-    // Firebase instance variables
-    private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mUserDatabaseReference;
-    private ChildEventListener mChildEventListener;
-
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -47,7 +38,11 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_dashboard:
-                    loadFragment(new DashboardFragment());
+                    try {
+                        loadFragment(DashboardFragment.newInstance(student.getUID()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     return true;
                 case R.id.navigation_my_clubs:
                     loadFragment(new MyClubsFragment());
@@ -69,13 +64,10 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        loadFragment(new DashboardFragment());
-
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
 
 
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
@@ -84,16 +76,19 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
                 FirebaseUser user = firebaseAuth.getCurrentUser();
 
                 if (user != null) {
-                    onSignedInInit();
-                    Log.e("UID", user.getUid());
-                    UserDBUtils.checkNewUser(user, new UserDBUtils.OnOscarListener() {
+                    UserDBUtils.checkNewUser(user, new UserDBUtils.OnSuccessUserListener() {
                         @Override
-                        public void oscarin(Student student) {
+                        public void onSuccessUserListener(Student student) {
                             MainActivity.this.student = student;
+
+                            try {
+                                loadFragment(DashboardFragment.newInstance(student.getUID()));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     });
                 } else {
-                    onSignedOutCleanup();
                     startActivityForResult(
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
@@ -120,13 +115,6 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
         }
 
         return false;
-    }
-
-    private void onSignedOutCleanup() {
-    }
-
-    private void onSignedInInit() {
-        // TODO: SHOW UP THE NEWEST EVENTS FROM ALL THE CLUBS WHERE THE CLUB IS A MEMBER
     }
 
     @Override
