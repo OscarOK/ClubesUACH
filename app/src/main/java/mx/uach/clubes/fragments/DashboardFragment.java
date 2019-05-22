@@ -82,6 +82,11 @@ public class DashboardFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.rv_dashboard);
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         CollectionReference collections = db.collection("posts");
 
