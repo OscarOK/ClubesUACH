@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -48,6 +49,7 @@ public class DashboardFragment extends Fragment {
     private String uid;
 
     private RecyclerView recyclerView;
+    private ProgressBar progressBar;
     private PostsAdapter adapter;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -81,6 +83,8 @@ public class DashboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView = view.findViewById(R.id.rv_dashboard);
+        progressBar = view.findViewById(R.id.pb_loading_posts);
+        recyclerView.setVisibility(View.GONE);
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
     }
 
@@ -117,25 +121,31 @@ public class DashboardFragment extends Fragment {
                             @Override
                             public void onSuccessLoadPosts(final ArrayList<AuthorPost> posts) {
                                 adapter = new PostsAdapter(posts);
-                                recyclerView.setAdapter(adapter);
 
-                                adapter.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        int index = recyclerView.getChildAdapterPosition(v);
-                                        AuthorPost post = posts.get(index);
+                                if (adapter.getItemCount() > 0) {
+                                    adapter.notifyDataSetChanged();
+                                    recyclerView.setAdapter(adapter);
+                                    adapter.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            int index = recyclerView.getChildAdapterPosition(v);
+                                            AuthorPost post = posts.get(index);
 
-                                        Bundle args = new Bundle();
-                                        args.putString("post_club_name", post.getClubName());
-                                        args.putString("post_title", post.getTitle());
-                                        args.putString("post_content", post.getContent());
-                                        args.putString("post_date", post.getDateStr());
+                                            Bundle args = new Bundle();
+                                            args.putString("post_club_name", post.getClubName());
+                                            args.putString("post_title", post.getTitle());
+                                            args.putString("post_content", post.getContent());
+                                            args.putString("post_date", post.getDateStr());
 
-                                        Intent i = new Intent(getActivity(), PostActivity.class);
-                                        i.putExtras(args);
-                                        startActivity(i);
-                                    }
-                                });
+                                            Intent i = new Intent(getActivity(), PostActivity.class);
+                                            i.putExtras(args);
+                                            startActivity(i);
+                                        }
+                                    });
+
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    progressBar.setVisibility(View.GONE);
+                                }
                             }
                         });
                     }

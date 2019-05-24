@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".PostActivity">
 
+
+
     <ImageView
         android:id="@+id/img_full_post_profile"
         android:layout_width="@dimen/profile_image_side"
