@@ -76,17 +76,7 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
                 FirebaseUser user = firebaseAuth.getCurrentUser();
 
                 if (user != null) {
-                    UserDBUtils.signInUser(user, new UserDBUtils.OnSuccessUserListener() {
-                        @Override
-                        public void onSuccessUserListener(Student student) {
-                            MainActivity.this.student = student;
-                            try {
-                                loadFragment(DashboardFragment.newInstance(student.getUID()));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
+                    launchDashBoardFragment(user);
                 } else {
                     startActivityForResult(
                             AuthUI.getInstance()
@@ -141,22 +131,26 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
             } else {
                 FirebaseUser user = mFirebaseAuth.getCurrentUser();
                 if (user != null) {
-                    UserDBUtils.signInUser(user, new UserDBUtils.OnSuccessUserListener() {
-                        @Override
-                        public void onSuccessUserListener(Student student) {
-                            MainActivity.this.student = student;
-
-                            try {
-                                loadFragment(DashboardFragment.newInstance(MainActivity.this.student.getUID()));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
+                    launchDashBoardFragment(user);
                 }
             }
 
         }
+    }
+
+    private void launchDashBoardFragment(FirebaseUser user) {
+        UserDBUtils.signInUser(user, new UserDBUtils.OnSuccessUserListener() {
+            @Override
+            public void onSuccessUserListener(Student student) {
+                MainActivity.this.student = student;
+
+                try {
+                    loadFragment(DashboardFragment.newInstance(MainActivity.this.student.getUID()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
