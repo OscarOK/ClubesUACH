@@ -6,12 +6,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.MyClubsFragment">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_clubs"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        </android.support.v7.widget.RecyclerView>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_clubs"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </android.support.v7.widget.RecyclerView>
 
+    <ProgressBar
+        android:layout_gravity="center"
+        android:id="@+id/pb_loading_clubs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_add_club"
         android:layout_width="wrap_content"

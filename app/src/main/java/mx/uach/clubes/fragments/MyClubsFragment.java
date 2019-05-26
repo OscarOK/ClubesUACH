@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -49,23 +50,22 @@ public class MyClubsFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
     private String uid;
 
-    private PostsAdapter adapter;
+    private ClubAdapter adapter;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private OnFragmentInteractionListener mListener;
 
     private RecyclerView rvClubs;
+    private ProgressBar progressBar;
 
 
 
-    public MyClubsFragment() {
-        // Required empty public constructor
-    }
+
+    public MyClubsFragment() {}
 
 
     public static MyClubsFragment newInstance(String uid) {
@@ -98,7 +98,10 @@ public class MyClubsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         FloatingActionButton fabAddClub = view.findViewById(R.id.fab_add_club);
+        progressBar = view.findViewById(R.id.pb_loading_clubs);
         rvClubs = view.findViewById(R.id.rv_clubs);
+        rvClubs.setVisibility(View.GONE);
+        rvClubs.setLayoutManager(new LinearLayoutManager(view.getContext()));
 
         final Context context = view.getContext();
 
@@ -108,19 +111,12 @@ public class MyClubsFragment extends Fragment {
                 Toast.makeText(context, "DEMO", Toast.LENGTH_SHORT).show();
             }
         });
-
-
-
-        // Initialize message ListView and its adapter
-        ArrayList<Club> friendlyMessages = new ArrayList<>();
-        ClubAdapter mClubAdapter = new ClubAdapter(friendlyMessages);
-        rvClubs.setAdapter(mClubAdapter);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        CollectionReference collections = db.collection("posts");
+        CollectionReference collections = db.collection("students/" + uid + "/clubs");
 
         collections.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
@@ -131,8 +127,6 @@ public class MyClubsFragment extends Fragment {
                 }
             }
         });
-
-
         update();
     }
     private void update() {
@@ -144,37 +138,13 @@ public class MyClubsFragment extends Fragment {
                     @Override
                     public void onSuccessLoadClubs(ArrayList<Club> clubs) {
 
-                        PostsDBUtils.getClubsPosts(clubs, new PostsDBUtils.OnSuccessLoadPosts() {
-                            @Override
-                            public void onSuccessLoadPosts(final ArrayList<AuthorPost> posts) {
-                                adapter = new PostsAdapter(posts);
-
-                                if (adapter.getItemCount() > 0) {
-                                    adapter.notifyDataSetChanged();
-                                    rvClubs.setAdapter(adapter);
-                                    adapter.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            int index = rvClubs.getChildAdapterPosition(v);
-                                            AuthorPost post = posts.get(index);
-
-                                            Bundle args = new Bundle();
-                                            args.putString("post_club_name", post.getClubName());
-                                            args.putString("post_title", post.getTitle());
-                                            args.putString("post_content", post.getContent());
-                                            args.putString("post_date", post.getDateStr());
-
-                                            Intent i = new Intent(getActivity(), PostActivity.class);
-                                            i.putExtras(args);
-                                            startActivity(i);
-                                        }
-                                    });
-
-                                    rvClubs.setVisibility(View.VISIBLE);
-
-                                }
-                            }
-                        });
+                        adapter = new ClubAdapter(clubs);
+                        if(adapter.getItemCount() > 0){
+                            adapter.notifyDataSetChanged();
+                            rvClubs.setAdapter(adapter);
+                        }
+                        rvClubs.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
             }
