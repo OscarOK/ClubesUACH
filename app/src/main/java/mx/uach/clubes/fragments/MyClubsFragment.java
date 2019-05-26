@@ -1,24 +1,41 @@
 package mx.uach.clubes.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import mx.uach.clubes.PostActivity;
+import mx.uach.clubes.Posts.AuthorPost;
 import mx.uach.clubes.R;
+import mx.uach.clubes.Utils.PostsDBUtils;
+import mx.uach.clubes.Utils.UserDBUtils;
 import mx.uach.clubes.adapters.ClubAdapter;
+import mx.uach.clubes.adapters.ClubsAdapter;
+import mx.uach.clubes.adapters.PostsAdapter;
 import mx.uach.clubes.clubs.Club;
+import mx.uach.clubes.users.Student;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,29 +52,26 @@ public class MyClubsFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String uid;
 
+    private PostsAdapter adapter;
+
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private OnFragmentInteractionListener mListener;
+
+    private RecyclerView rvClubs;
+
+
 
     public MyClubsFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MyClubsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MyClubsFragment newInstance(String param1, String param2) {
+
+    public static MyClubsFragment newInstance(String uid) {
         MyClubsFragment fragment = new MyClubsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM1, uid);
         fragment.setArguments(args);
         return fragment;
     }
@@ -66,15 +80,16 @@ public class MyClubsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            uid = getArguments().getString(ARG_PARAM1);
         }
     }
+
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         return inflater.inflate(R.layout.fragment_my_clubs, container, false);
     }
 
@@ -83,7 +98,7 @@ public class MyClubsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         FloatingActionButton fabAddClub = view.findViewById(R.id.fab_add_club);
-        RecyclerView rvClubs = view.findViewById(R.id.rv_clubs);
+        rvClubs = view.findViewById(R.id.rv_clubs);
 
         final Context context = view.getContext();
 
@@ -94,10 +109,76 @@ public class MyClubsFragment extends Fragment {
             }
         });
 
+
+
         // Initialize message ListView and its adapter
-        List<Club> friendlyMessages = new ArrayList<>();
-        //ClubAdapter mClubAdapter = new ClubAdapter(view.getContext(), R.layout.club_item, friendlyMessages);
-        //rvClubs.setAdapter(mClubAdapter);
+        ArrayList<Club> friendlyMessages = new ArrayList<>();
+        ClubAdapter mClubAdapter = new ClubAdapter(friendlyMessages);
+        rvClubs.setAdapter(mClubAdapter);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        CollectionReference collections = db.collection("posts");
+
+        collections.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots,
+                                @javax.annotation.Nullable FirebaseFirestoreException e) {
+                if (queryDocumentSnapshots != null) {
+                    update();
+                }
+            }
+        });
+
+
+        update();
+    }
+    private void update() {
+        UserDBUtils.getUser(uid, new UserDBUtils.OnSuccessUserListener() {
+            @Override
+            public void onSuccessUserListener(Student student) {
+
+                PostsDBUtils.getClubs(student.getClubs(), new PostsDBUtils.OnSuccessLoadClubs() {
+                    @Override
+                    public void onSuccessLoadClubs(ArrayList<Club> clubs) {
+
+                        PostsDBUtils.getClubsPosts(clubs, new PostsDBUtils.OnSuccessLoadPosts() {
+                            @Override
+                            public void onSuccessLoadPosts(final ArrayList<AuthorPost> posts) {
+                                adapter = new PostsAdapter(posts);
+
+                                if (adapter.getItemCount() > 0) {
+                                    adapter.notifyDataSetChanged();
+                                    rvClubs.setAdapter(adapter);
+                                    adapter.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            int index = rvClubs.getChildAdapterPosition(v);
+                                            AuthorPost post = posts.get(index);
+
+                                            Bundle args = new Bundle();
+                                            args.putString("post_club_name", post.getClubName());
+                                            args.putString("post_title", post.getTitle());
+                                            args.putString("post_content", post.getContent());
+                                            args.putString("post_date", post.getDateStr());
+
+                                            Intent i = new Intent(getActivity(), PostActivity.class);
+                                            i.putExtras(args);
+                                            startActivity(i);
+                                        }
+                                    });
+
+                                    rvClubs.setVisibility(View.VISIBLE);
+
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -138,4 +219,5 @@ public class MyClubsFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
 }

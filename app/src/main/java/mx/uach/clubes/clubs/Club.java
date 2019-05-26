@@ -8,6 +8,15 @@ public class Club {
     private String vision;
     private String category;
     private String objectives;
+    private String image;
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
 
     public String getId() {
         return id;

@@ -46,7 +46,11 @@ public class MainActivity extends AppCompatActivity implements MyClubsFragment.O
                     }
                     return true;
                 case R.id.navigation_my_clubs:
-                    loadFragment(new MyClubsFragment());
+                    try {
+                        loadFragment(MyClubsFragment.newInstance(student.getUID()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     return true;
                 case R.id.navigation_profile:
                         try {
