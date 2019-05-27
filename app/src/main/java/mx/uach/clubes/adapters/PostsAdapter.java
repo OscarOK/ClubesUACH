@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 import mx.uach.clubes.Posts.AuthorPost;
@@ -43,6 +45,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             tvPostDate = itemView.findViewById(R.id.tv_post_time);
             tvPostTitle = itemView.findViewById(R.id.tv_post_title);
             tvPostContent = itemView.findViewById(R.id.tv_post_content);
+            ivClubProfile = itemView.findViewById(R.id.im_post_profile);
         }
     }
 
@@ -68,6 +71,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         viewHolder.tvPostDate.setText(post.getDateStr());
         viewHolder.tvPostTitle.setText(post.getTitle());
         viewHolder.tvPostContent.setText(post.getContent());
+        Picasso.get().load(post.getImgClub()).into(viewHolder.ivClubProfile);
     }
 
     @Override

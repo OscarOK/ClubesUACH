@@ -63,9 +63,11 @@ public abstract class PostsDBUtils {
         CollectionReference postsRef = db.collection(COLLECTION_POSTS);
         ArrayList<Task<QuerySnapshot>> tasks = new ArrayList<>();
         final Map<String, String> names = new HashMap<>();
+        final Map<String, String> imgs = new HashMap<>();
 
         for (Club club : clubs) {
             names.put(club.getId(), club.getName());
+            imgs.put(club.getId(), club.getImage());
         }
 
         for (Club club : clubs) {
@@ -86,6 +88,7 @@ public abstract class PostsDBUtils {
                         AuthorPost post = documentSnapshot.toObject(AuthorPost.class);
 
                         post.setClubName(names.get(post.getClubId()));
+                        post.setImgClub(imgs.get(post.getClubId()));
                         posts.add(post);
                     }
                 }

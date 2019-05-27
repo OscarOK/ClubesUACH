@@ -2,6 +2,7 @@ package mx.uach.clubes.Posts;
 
 public class AuthorPost extends Post implements Comparable<AuthorPost> {
     private String clubName;
+    private String imgClub;
 
     public AuthorPost() {
         super();
@@ -10,6 +11,14 @@ public class AuthorPost extends Post implements Comparable<AuthorPost> {
     public AuthorPost(String clubName) {
         super();
         this.clubName = clubName;
+    }
+
+    public String getImgClub() {
+        return imgClub;
+    }
+
+    public void setImgClub(String imgClub) {
+        this.imgClub = imgClub;
     }
 
     public String getClubName() {
