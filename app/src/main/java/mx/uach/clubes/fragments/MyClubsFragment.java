@@ -27,6 +27,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+import mx.uach.clubes.AddClubActivity;
 import mx.uach.clubes.PostActivity;
 import mx.uach.clubes.Posts.AuthorPost;
 import mx.uach.clubes.R;
@@ -62,7 +63,7 @@ public class MyClubsFragment extends Fragment {
     private RecyclerView rvClubs;
     private ProgressBar progressBar;
 
-
+    private ArrayList<Club> clubsList;
 
 
     public MyClubsFragment() {}
@@ -108,7 +109,10 @@ public class MyClubsFragment extends Fragment {
         fabAddClub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "DEMO", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(), AddClubActivity.class);
+                intent.putExtra("uid", uid);
+                startActivity(intent);
+
             }
         });
     }
@@ -137,7 +141,7 @@ public class MyClubsFragment extends Fragment {
                 PostsDBUtils.getClubs(student.getClubs(), new PostsDBUtils.OnSuccessLoadClubs() {
                     @Override
                     public void onSuccessLoadClubs(ArrayList<Club> clubs) {
-
+                        clubsList = clubs;
                         adapter = new ClubAdapter(clubs);
                         if(adapter.getItemCount() > 0){
                             adapter.notifyDataSetChanged();
@@ -149,13 +153,6 @@ public class MyClubsFragment extends Fragment {
                 });
             }
         });
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
