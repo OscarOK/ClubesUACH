@@ -136,6 +136,7 @@ public class DashboardFragment extends Fragment {
                                             args.putString("post_title", post.getTitle());
                                             args.putString("post_content", post.getContent());
                                             args.putString("post_date", post.getDateStr());
+                                            args.putString("post_img_profile", post.getImgClub());
 
                                             Intent i = new Intent(getActivity(), PostActivity.class);
                                             i.putExtras(args);
